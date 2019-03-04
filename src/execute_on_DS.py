@@ -9,32 +9,16 @@ import xml.etree.ElementTree as ET
 
 from multiprocessing import Pool, cpu_count
 
-
-# # upload the collection
-# url = "http://divaservices.unifr.ch/api/v2/collections"
-#
-# # https://www.dropbox.com/s/74468ab1xbg59ke/hisdoc_pxl_gt.zip?dl=0
-# payload = "{\"name\": \"histdoc_pxl_gt\",\"files\":[{\"type\":\"url\",\"value\":\"http://dl.dropboxusercontent.com/s/74468ab1xbg59ke/hisdoc_pxl_gt.zip\"}]}"
-# headers = {
-#     'cookie': "connect.sid=s%253AlVnYS-gca6TYL4F8f-g5Gnre_KkwRusW.wfF1VYCQI5Z%252BXyZ0s%252Be9El1w7gog7RydruWswlzdkU8",
-#     'content-type': "application/json"
-#     }
-#
-# response = requests.request("POST", url, data=payload, headers=headers)
-#
-# print(response.text)
-
-# -----------
-
 # iterate over the folder with the gt, get the name and add it to to colection name
 # execute the method for each of this commands once
 # save return json in list
 
 BASE_FOLDER = '/Users/voegtlil/Documents/Datasets/003-DataSet/hisdoc_DS'
-PXL_BASE_FOLDER = os.path.join(BASE_FOLDER, "pxl_gt")
+PXL_BASE_FOLDER = os.path.join(BASE_FOLDER, "pxl_output")
 XML_BASE_FOLDER = os.path.join(BASE_FOLDER, "xml_gt")
 OUTPUT_PATH = './output'
-DS_COLLECTION_NAME = 'hisdoc_textline_gt'
+# DS_COLLECTION_NAME = 'hisdoc_textline_gt'
+DS_COLLECTION_NAME = 'hisdoc_textline_output'
 
 
 def get_file_list(dir):
@@ -135,7 +119,8 @@ if __name__ == '__main__':
         DO NOT FORGET TO SET THE RIGHT COLLECTION NAME
     """
 
-    die_file = 'e-codices_csg-0018_049_max_gt'
+    die_file_img = 'e-codices_fmb-cb-0055_0109r_max_output' + '.png'
+    die_file_xml = 'e-codices_fmb-cb-0055_0109r_max_gt' + '.xml'
 
     if not os.path.exists(OUTPUT_PATH):
         os.makedirs(os.path.join(OUTPUT_PATH))
@@ -152,7 +137,7 @@ if __name__ == '__main__':
 
     image_list, xml_list = load_files()
 
-    execute(die_file + '.png', die_file + '.xml', True)
+    execute(die_file_img, die_file_xml, True)
 
     # pool = Pool(processes=cpu_count())
     #
