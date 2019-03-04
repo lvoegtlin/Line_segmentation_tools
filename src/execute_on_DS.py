@@ -34,6 +34,7 @@ BASE_FOLDER = '/Users/voegtlil/Documents/Datasets/003-DataSet/hisdoc_DS'
 PXL_BASE_FOLDER = os.path.join(BASE_FOLDER, "pxl_gt")
 XML_BASE_FOLDER = os.path.join(BASE_FOLDER, "xml_gt")
 OUTPUT_PATH = './output'
+DS_COLLECTION_NAME = 'hisdoc_textline_gt'
 
 
 def get_file_list(dir):
@@ -82,9 +83,9 @@ def saveFile(url, filename, output_folder):
         file.write(response.content)
 
 
-def load_files():
-    image_list = get_file_list(PXL_BASE_FOLDER)
-    xml_list = get_file_list(XML_BASE_FOLDER)
+def load_files(pxl_gt_path=PXL_BASE_FOLDER, xml_gt_path=XML_BASE_FOLDER):
+    image_list = get_file_list(pxl_gt_path)
+    xml_list = get_file_list(xml_gt_path)
 
     return image_list, xml_list
 
@@ -111,7 +112,7 @@ def execute(img, xml, hole_image):
     payload = "{\"parameters\": {\"highlighter\": {\"type\": \"rectangle\",\"closed\": true," \
               "\"segments\": [[" + bb_coords[0] + "], [" + bb_coords[1] + "], [" + bb_coords[2] + "], [" + bb_coords[3] + "]]}" \
               ",\"smooth\": 0.0003,\"slices\": 4,\"sigma\": 3}," \
-              "\"data\": [{\"inputImage\": \"hisdoc_textline_gt/" + img + "\"}]}"
+              "\"data\": [{\"inputImage\": \"" + DS_COLLECTION_NAME + "/" + img + "\"}]}"
 
     headers = {'content-type': 'application/json'}
 
@@ -129,6 +130,10 @@ def execute(img, xml, hole_image):
 
 
 if __name__ == '__main__':
+    """
+        DO NOT FORGET TO UPLOAD THE DATASET ON DS
+        DO NOT FORGET TO SET THE RIGHT COLLECTION NAME
+    """
 
     die_file = 'e-codices_csg-0018_049_max_gt'
 

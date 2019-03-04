@@ -5,10 +5,10 @@ import numpy as np
 from src.execute_on_DS import load_files
 
 BASE_FOLDER = '/Users/voegtlil/Documents/Datasets/003-DataSet/hisdoc_DS'
-PXL_BASE_FOLDER = os.path.join(BASE_FOLDER, "pxl_gt")
-OUTPUT_PATH = os.path.join(BASE_FOLDER, "textline_gt")
+PXL_BASE_FOLDER = os.path.join(BASE_FOLDER, "pxl_output")
+OUTPUT_PATH = os.path.join(BASE_FOLDER, "textline_output")
 
-img_list, _ = load_files()
+img_list, _ = load_files(PXL_BASE_FOLDER)
 
 for img_path in img_list:
     # read in image
