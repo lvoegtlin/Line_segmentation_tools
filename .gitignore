@@ -107,3 +107,4 @@ venv.bak/
 *.iml
 res/*
 
+*/output/*
