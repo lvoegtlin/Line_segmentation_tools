@@ -5,9 +5,9 @@ import os
 import numpy as np
 import xml.etree.ElementTree as ET
 
-from src.XMLhandler import writePAGEfile
+from src.util.XMLhandler import writePAGEfile
 
-BASE_FOLDER_EXTRACTION = './../res/on_output_with_crop'
+BASE_FOLDER_EXTRACTION = './../res/on_gt_full_page'
 JSON_BASE_FOLDER = os.path.join(BASE_FOLDER_EXTRACTION, "pxl_gt")
 OUTPUT_PATH = os.path.join(BASE_FOLDER_EXTRACTION, "textline_output")
 
