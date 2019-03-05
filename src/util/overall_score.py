@@ -41,4 +41,4 @@ def _get_lines(folder, path):
 
 
 if __name__ == '__main__':
-    write_stats(path='../results/line_seg_res_v1/')
+    write_stats(path='./../../res/on_gt_with_crop/', errors=[])

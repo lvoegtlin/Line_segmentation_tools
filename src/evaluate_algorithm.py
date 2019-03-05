@@ -1,18 +1,16 @@
 import argparse
-import itertools
 import os
+import re
 import shutil
 import time
-import re
-import traceback
+import itertools
+from multiprocessing import Pool, cpu_count
+from subprocess import Popen, PIPE, STDOUT
 
 import numpy as np
 
-from multiprocessing import Pool, cpu_count
-from subprocess import Popen, PIPE, STDOUT
 from src.util.overall_score import write_stats
 
-VERTICAL = False
 
 def check_extension(filename, extension_list):
     return any(filename.endswith(extension) for extension in extension_list)
@@ -39,57 +37,23 @@ def get_score(logs, token):
     return None
 
 
-def compute_for_all(input_img, gt_xml, gt_pxl, output_path, param_list, eval_tool):
-    param_string = "_penalty_reduction_{}_seams_{}".format(
-        param_list['penalty_reduction'],
-        param_list['seam_every_x_pxl'])
-
-    print("Starting: {} with {}".format(input_img, param_string))
-    # Run the tool
-    try:
-        extract_textline(input_img, output_path, **param_list, vertical=VERTICAL)
-        print("Done: {} with {}".format(input_img, param_string))
-    except:
-        # for debugging
-        print("Failed for some reason")
-        return [None, traceback.format_exc(), param_list]
-
-    line_extraction_root_folder = str(os.path.basename(input_img).split('.')[0] + param_string)
-
-    # Run the JAR for PIXEL SEGMENTATION ################################################
-    # print("Starting: (pixel) JAR {}".format(input_img))
-    # apply_preprocess(input_image_path=input_img,
-    #                   text_mask_path=os.path.join(output_path, line_extraction_root_folder, 'preprocess/after_preprocessing.png'),
-    #                   output_path=os.path.join(output_path, 'postprocessd'))
-    # p = Popen(['java', '-jar', './src/pixel_segmentation/evaluation/LayoutAnalysisEvaluator.jar',
-    #            '-p', os.path.join(output_path, 'postprocessd', input_img.split('/')[-1]),
-    #            '-gt', gt_pxl,
-    #            '-dv'],
-    #           stdout=PIPE, stderr=STDOUT)
-    # print("Done: (pixel) JAR {} score={}".format(input_img,get_score( [line for line in p.stdout], "Mean IU (Jaccard index) =")))
-
-    # Run the JAR for LINE SEGMENTATION ################################################
-    # Check where is the path - Debugging only
-    # p = Popen(['ls'], stdout=PIPE, stderr=STDOUT)
-    # logs = [line for line in p.stdout]
-
+def compute_for_all(input_xml, gt_xml, gt_pxl, output_path, eval_tool):
     original_img_name = os.path.basename(gt_xml).replace('_gt.xml', '.jpg')
-    original_img_path = os.path.dirname(gt_xml).replace('private-page', 'private')
+    original_img_path = os.path.dirname(gt_xml).replace('xml_gt', 'ori_img')
 
-    print("Starting: JAR {} with {}".format(input_img, param_string))
+    print("Starting: JAR {}".format(input_xml))
     p = Popen(['java', '-jar', eval_tool,
                '-igt', gt_pxl,
                '-xgt', gt_xml,
                '-overlap', os.path.join(original_img_path, original_img_name),
-               '-xp', os.path.join(output_path, line_extraction_root_folder, 'polygons.xml'),
+               '-xp', input_xml,
                '-csv'], stdout=PIPE, stderr=STDOUT)
     logs = [line for line in p.stdout]
-    print("Done: JAR {} with {}".format(input_img, param_string))
-    return [get_score(logs, "line IU ="), logs, param_list]
+    print("Done: JAR {}".format(input_xml))
+    return [get_score(logs, "line IU ="), logs]
 
 
-def evaluate(input_folders_pxl, gt_folders_xml, gt_folders_pxl, output_path, j, eval_tool,
-             penalty_reduction, seam_every_x_pxl, **kwargs):
+def evaluate(input_folders_xml, gt_folders_xml, gt_folders_pxl, output_path, j, eval_tool, **kwargs):
 
     # Select the number of threads
     if j == 0:
@@ -98,9 +62,9 @@ def evaluate(input_folders_pxl, gt_folders_xml, gt_folders_pxl, output_path, j, 
         pool = Pool(processes=j)
 
     # Get the list of all input images
-    input_images = []
-    for path in input_folders_pxl:
-        input_images.extend(get_file_list(path, ['.png']))
+    input_xml = []
+    for path in input_folders_xml:
+        input_xml.extend(get_file_list(path, ['.xml']))
 
     # Get the list of all GT XML
     gt_xml = []
@@ -114,9 +78,6 @@ def evaluate(input_folders_pxl, gt_folders_xml, gt_folders_pxl, output_path, j, 
 
     # Create output path for run
     tic = time.time()
-    output_path = os.path.join(output_path, 'penalty_reduction_{}_seams_{}'.format(
-        penalty_reduction,
-        seam_every_x_pxl))
 
     if not os.path.exists(output_path):
         os.makedirs(os.path.join(output_path))
@@ -137,13 +98,12 @@ def evaluate(input_folders_pxl, gt_folders_xml, gt_folders_pxl, output_path, j, 
     #gt_pxl = [gt_pxl[1]]
 
     # For each file run
-    param_list = dict(penalty_reduction=penalty_reduction, seam_every_x_pxl=seam_every_x_pxl)
-    results = list(pool.starmap(compute_for_all, zip(input_images,
-                                                gt_xml,
-                                                gt_pxl,
-                                                itertools.repeat(output_path),
-                                                itertools.repeat(param_list),
-                                                itertools.repeat(eval_tool))))
+    results = list(pool.starmap(compute_for_all, zip(input_xml,
+                                                    gt_xml,
+                                                    gt_pxl,
+                                                    itertools.repeat(output_path),
+                                                    itertools.repeat(eval_tool)
+                                                     )))
     pool.close()
     print("Pool closed)")
 
@@ -161,7 +121,7 @@ def evaluate(input_folders_pxl, gt_folders_xml, gt_folders_pxl, output_path, j, 
     else:
         score = -1
 
-    np.save(os.path.join(output_path, 'results.npy'), results)
+    # np.save(os.path.join(output_path, 'results.npy'), results)
     write_stats(output_path, errors)
     print('Total time taken: {:.2f}, avg_line_iu={}, nb_errors={}'.format(time.time() - tic, score, len(errors)))
     return score
@@ -171,7 +131,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Grid search to identify best hyper-parameters for text line '
                                                  'segmentation.')
     # Path folders
-    parser.add_argument('--input-folders-pxl', nargs='+', type=str,
+    parser.add_argument('--input-folders-xml', nargs='+', type=str,
                         required=True,
                         help='path to folders containing pixel-gt (e.g. /dataset/CB55/output-m /dataset/CSG18/output-m /dataset/CSG863/output-m)')
     parser.add_argument('--gt-folders-xml', nargs='+', type=str,
@@ -185,26 +145,13 @@ if __name__ == "__main__":
                         help='path to store output files')
 
     # Method parameters
-    parser.add_argument('--penalty-reduction', type=int,
-                        required=True,
-                        help='path to store output files')
-    parser.add_argument('--seam-every-x-pxl', type=int,
-                        required=True,
-                        help='how many pixels between the seams')
-    parser.add_argument('--vertical',
-                        default=False,
-                        action='store_true',
-                        help='assume text has vertical orientation (e.g. Chinese')
     # Environment
     parser.add_argument('--eval-tool', metavar='DIR',
-                        default='./src/line_segmentation/evaluation/LineSegmentationEvaluator.jar',
+                        default='./util/LineSegmentationEvaluator.jar',
                         help='path to folder containing DIVA_Line_Segmentation_Evaluator')
     parser.add_argument('-j', type=int,
                         default=0,
                         help='number of thread to use for parallel search. If set to 0 #cores will be used instead')
     args = parser.parse_args()
-
-    if args.vertical:
-        VERTICAL = True
 
     evaluate(**args.__dict__)
