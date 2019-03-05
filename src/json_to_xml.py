@@ -2,13 +2,16 @@
 import fnmatch
 import json
 import os
+import numpy as np
 import xml.etree.ElementTree as ET
 
 from src.XMLhandler import writePAGEfile
 
-BASE_FOLDER = './../res/on_gt_full_page'
-JSON_BASE_FOLDER = os.path.join(BASE_FOLDER, "pxl_gt")
-OUTPUT_PATH = os.path.join(BASE_FOLDER, "textline_output")
+BASE_FOLDER_EXTRACTION = './../res/on_output_with_crop'
+JSON_BASE_FOLDER = os.path.join(BASE_FOLDER_EXTRACTION, "pxl_gt")
+OUTPUT_PATH = os.path.join(BASE_FOLDER_EXTRACTION, "textline_output")
+
+BASE_FOLDER_XML_GT = '/Users/voegtlil/Documents/Datasets/003-DataSet/hisdoc_DS/xml_gt'
 
 
 # get all the folders
@@ -32,10 +35,8 @@ def get_json_path(folder):
 
 
 def get_xml_path(folder):
-    for the_file in os.listdir(folder):
-        if fnmatch.fnmatch(the_file, '*.xml'):
-            return os.path.join(folder, the_file)
-    return None
+    xml_file_path = os.path.join(BASE_FOLDER_XML_GT, os.path.basename(folder) + ".xml")
+    return xml_file_path.replace('output', 'gt')
 
 
 def get_offset(folder):
@@ -45,10 +46,10 @@ def get_offset(folder):
     tree = ET.parse(xml_path)
     root = tree.getroot()
 
-    return root[1][0][0].attrib['points'].split(" ")[0]
+    return np.asarray(root[1][0][0].attrib['points'].split(" ")[0].split(","), dtype=int)
 
 
-folders = get_folder_list(BASE_FOLDER)
+folders = get_folder_list(BASE_FOLDER_EXTRACTION)
 
 # produces list of polygon strings
 for folder in folders:
@@ -69,7 +70,7 @@ for folder in folders:
             for i, point in enumerate(polygon['array']['values']):
                 if i % 3 != 0:
                     continue
-                line_string.append("{},{}".format(int(point[1]), int(point[0])))
+                line_string.append("{},{}".format(int(point[1]) + offset[1], int(point[0]) + offset[0]))
             strings.append(' '.join(line_string))
     # write down the xml
     writePAGEfile(output_path=os.path.join(folder, "polygons.xml"), text_lines=strings)
