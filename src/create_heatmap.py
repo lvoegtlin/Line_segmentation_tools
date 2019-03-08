@@ -47,7 +47,7 @@ if __name__ == '__main__':
     penalties = np.asarray(penalties)
     seams_per = np.asarray(seams_per)
     scores = np.asarray(scores)
-    scores = scores.reshape((8, 10))
+    scores = scores.reshape((11, 10))
 
     # feed them to mathplotlibfig,
     fig, ax = plt.subplots()
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # Create colorbar
     cbar = ax.figure.colorbar(im, ax=ax)
-    cbar.ax.set_ylabel('Line IU', rotation=-90, va="bottom")
+    cbar.ax.set_ylabel('', rotation=-90, va="bottom")
 
     ax.set_xticks(np.arange(len(seams_per)))
     ax.set_yticks(np.arange(len(penalties)))
@@ -63,6 +63,11 @@ if __name__ == '__main__':
     ax.set_xticklabels(seams_per)
     ax.set_yticklabels(penalties)
 
-    plt.show()
+    ax.set_ylabel('Penalty ' + r'$\alpha$')
+    ax.set_xlabel('Seam every ' + r'$\beta$' + ' pixel')
+
+    ax.set_title("Parameter Robustness Evaluation - line IU")
+
+    plt.savefig(os.path.join(BASE_PATH, 'grid_search_heatmap.png'))
 
 

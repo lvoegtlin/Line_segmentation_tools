@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from src.util.XMLhandler import writePAGEfile
 
-BASE_FOLDER_EXTRACTION = './../res/on_rgb_with_crop'
+BASE_FOLDER_EXTRACTION = './../res/on_output_with_crop'
 JSON_BASE_FOLDER = os.path.join(BASE_FOLDER_EXTRACTION, "pxl_gt")
 OUTPUT_PATH = os.path.join(BASE_FOLDER_EXTRACTION, "textline_output")
 
@@ -39,7 +39,7 @@ def get_json_path(folder):
 
 def get_xml_path(folder):
     """ADAPT FOR NORMAL RGB (delete _gt)"""
-    xml_file_path = os.path.join(BASE_FOLDER_XML_GT, os.path.basename(folder) + "_gt.xml")
+    xml_file_path = os.path.join(BASE_FOLDER_XML_GT, os.path.basename(folder) + ".xml")#  "_gt.xml")
     return xml_file_path.replace('output', 'gt')
 
 

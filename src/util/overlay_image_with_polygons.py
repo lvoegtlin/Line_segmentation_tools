@@ -58,14 +58,14 @@ def overlay(path_img, path_xml, output_path):
 
 if __name__ == '__main__':
     # get folders in the output folder
-    images = ['0_ori_fast']
+    images = ['004533645_00059']
 
 
     # folders
-    xml_root = './../../res/arabic'
+    xml_root = './../../res/icdar19'
 
     for img in images:
         # get xmls
-        overlay('./../../res/arabic/' + img +'.jpg',
+        overlay('./../../res/icdar19/' + img +'.jpg',
                 os.path.join(xml_root, 'polygons.xml'),
                 os.path.join(xml_root, 'overlay.jpg'))

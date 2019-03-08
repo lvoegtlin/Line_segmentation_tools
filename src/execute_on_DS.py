@@ -14,11 +14,12 @@ from multiprocessing import Pool, cpu_count
 # save return json in list
 
 BASE_FOLDER = '/Users/voegtlil/Documents/Datasets/003-DataSet/hisdoc_DS'
-PXL_BASE_FOLDER = os.path.join(BASE_FOLDER, "pxl_output")
+PXL_BASE_FOLDER = os.path.join(BASE_FOLDER, "ori_img")
 XML_BASE_FOLDER = os.path.join(BASE_FOLDER, "xml_gt")
 OUTPUT_PATH = './output'
 # DS_COLLECTION_NAME = 'hisdoc_textline_gt'
-DS_COLLECTION_NAME = 'hisdoc_textline_output'
+# DS_COLLECTION_NAME = 'hisdoc_textline_output'
+DS_COLLECTION_NAME = 'hisdoc_rgb_ori'
 
 
 def get_file_list(dir):
@@ -137,11 +138,11 @@ if __name__ == '__main__':
 
     image_list, xml_list = load_files()
 
-    execute(die_file_img, die_file_xml, True)
+    # execute(die_file_img, die_file_xml, True)
 
-    # pool = Pool(processes=cpu_count())
-    #
-    # # For each file run
-    # pool.starmap(execute, zip(image_list, xml_list, itertools.repeat(True)))
-    # pool.close()
-    # print("Pool closed)")
+    pool = Pool(processes=cpu_count())
+
+    # For each file run
+    pool.starmap(execute, zip(image_list, xml_list, itertools.repeat(False)))
+    pool.close()
+    print("Pool closed)")

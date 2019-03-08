@@ -97,6 +97,10 @@ def evaluate(input_folders_xml, gt_folders_xml, gt_folders_pxl, output_path, j, 
     #gt_xml = [gt_xml[1]]
     #gt_pxl = [gt_pxl[1]]
 
+    # input_xml = input_xml[0:3]
+    # gt_xml = gt_xml[0:3]
+    # gt_pxl = gt_pxl[0:3]
+
     # For each file run
     results = list(pool.starmap(compute_for_all, zip(input_xml,
                                                     gt_xml,
