@@ -39,8 +39,8 @@ def get_polygons(xml_path):
 def draw_polygons(image, polygons):
     overlay_img = image.copy()
     for polygon in polygons:
-        cv2.polylines(image, np.array([[[np.int(p[0]), np.int(p[1])] for p in polygon]]), 1, color=(0, 128, 0), thickness=2)
-        cv2.fillPoly(overlay_img, np.array([[[np.int(p[0]), np.int(p[1])] for p in polygon]]), color=(0, 128, 0))
+        cv2.polylines(image, np.array([[[np.int(p[0]), np.int(p[1])] for p in polygon]]), 1, color=(0, 128, 0), thickness=3)
+        # cv2.fillPoly(overlay_img, np.array([[[np.int(p[0]), np.int(p[1])] for p in polygon]]), color=(0, 128, 0))
     cv2.addWeighted(overlay_img, 0.4, image, 0.6, 0, image)
     return image
 
@@ -58,14 +58,14 @@ def overlay(path_img, path_xml, output_path):
 
 if __name__ == '__main__':
     # get folders in the output folder
-    images = ['004533645_00059']
+    images = ['lines']
 
 
     # folders
-    xml_root = './../../res/icdar19'
+    xml_root = './../../res/new_image'
 
     for img in images:
         # get xmls
-        overlay('./../../res/icdar19/' + img +'.jpg',
+        overlay('./../../res/new_image/' + img +'.png',
                 os.path.join(xml_root, 'polygons.xml'),
                 os.path.join(xml_root, 'overlay.jpg'))
