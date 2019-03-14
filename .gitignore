@@ -108,3 +108,4 @@ venv.bak/
 res/*
 
 */output/*
+.DS_Store
