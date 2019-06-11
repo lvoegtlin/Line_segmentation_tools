@@ -5,7 +5,7 @@ import numpy as np
 import xml.etree.ElementTree as ET
 
 
-FOLDER_NAME_EXTENSION = '_penalty_reduction_90_seams_3000'
+# FOLDER_NAME_EXTENSION = '_penalty_reduction_90_seams_3000'
 
 
 def get_file_list(dir):
@@ -38,8 +38,8 @@ def get_polygons(xml_path):
 
 def draw_polygons(image, polygons):
     overlay_img = image.copy()
-    for polygon in polygons:
-        cv2.polylines(image, np.array([[[np.int(p[0]), np.int(p[1])] for p in polygon]]), 1, color=(0, 128, 0), thickness=3)
+    for i, polygon in enumerate(polygons):
+        cv2.polylines(image, np.array([[[np.int(p[0]), np.int(p[1])] for p in polygon]]), 1, color=((i*64) % 255, (i*32) % 255, (i*128)% 255), thickness=3)
         # cv2.fillPoly(overlay_img, np.array([[[np.int(p[0]), np.int(p[1])] for p in polygon]]), color=(0, 128, 0))
     cv2.addWeighted(overlay_img, 0.4, image, 0.6, 0, image)
     return image
@@ -58,14 +58,19 @@ def overlay(path_img, path_xml, output_path):
 
 if __name__ == '__main__':
     # get folders in the output folder
-    images = ['lines']
+    # images = ['lines']
 
+    input_folder = "/Users/voegtlil/Documents/09_Papers/HIPS 19/images/overlay"
+    overlay(os.path.join(input_folder, "00012-42.JPG"),
+            os.path.join(input_folder, "polygons.xml"),
+            os.path.join(input_folder, "overlay.jpg")
+            )
 
-    # folders
-    xml_root = './../../res/new_image'
-
-    for img in images:
-        # get xmls
-        overlay('./../../res/new_image/' + img +'.png',
-                os.path.join(xml_root, 'polygons.xml'),
-                os.path.join(xml_root, 'overlay.jpg'))
+    # # folders
+    # xml_root = './../../res/new_image'
+    #
+    # for img in images:
+    #     # get xmls
+    #     overlay('./../../res/new_image/' + img +'.png',
+    #             os.path.join(xml_root, 'polygons.xml'),
+    #             os.path.join(xml_root, 'overlay.jpg'))
